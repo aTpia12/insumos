@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\Store;
 
 class ProductController extends Controller
 {
@@ -15,7 +17,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $products = Product::all();
+        $stores = Store::all();
+        $categories = Category::all();
+        return view('products.index', compact('products', 'stores', 'categories'));
     }
 
     /**
@@ -36,7 +41,18 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        //
+        Product::create($request->all());
+
+        if($request->hasFile('image')){
+            $imageName = time().'.'.$request->image->extension();
+
+            $request->image->move(public_path('img'), $imageName);
+
+        }
+
+        alert()->success('Producto creado correctamente');
+
+        return redirect()->route('products.index');
     }
 
     /**
@@ -70,7 +86,19 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+        $product->description = $request->description;
+        $product->category_id = $request->category_id;
+        $product->name = $request->name;
+        $product->internal_code = $request->internal_code;
+        $product->code = $request->code;
+        $product->barcode = $request->barcode;
+        $product->price = $request->price;
+
+        $product->save();
+
+        alert()->success('Producto actualizado correctamente');
+
+        return redirect()->route('products.index');
     }
 
     /**
@@ -81,6 +109,10 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $product->delete();
+
+        alert()->success('Producto eliminado correctamente');
+
+        return redirect()->route('products.index');
     }
 }

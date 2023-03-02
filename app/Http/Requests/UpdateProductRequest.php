@@ -13,7 +13,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -26,5 +26,16 @@ class UpdateProductRequest extends FormRequest
         return [
             //
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function($validator){
+            if($validator->errors()->count()){
+                if(!in_array($this->method(), ['PUT', 'PATCH'])){
+                    $validator->errors()->add('post', true);
+                }
+            }
+        });
     }
 }
